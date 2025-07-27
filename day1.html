@@ -5,6 +5,8 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Swipeable Travel Card with Peek and Progress</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+
     <style>
         * {
             box-sizing: border-box;
@@ -140,6 +142,7 @@
             color: #00bcd4;
             cursor: pointer;
             font-weight: 600;
+            text-align: center;
         }
 
 
@@ -171,6 +174,92 @@
                 0 0 20px rgba(0, 114, 255, 0.8);
             transition: width 0.4s ease;
         }
+
+        .time-display {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            margin-bottom: 16px;
+
+            background-color: rgba(240, 240, 240, 0.8);
+            /* light transparent grey */
+            border-radius: 10px;
+            padding: 12px 16px;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+            /* optional subtle shadow */
+        }
+
+
+        .bottom-content {
+            width: 100%;
+            max-width: 360px;
+            margin-top: 20px;
+            padding: 0 10px;
+            color: #444;
+            font-size: 16px;
+            line-height: 1.6;
+            font-weight: 500;
+            max-height: 160px;
+            overflow-y: auto;
+            user-select: text;
+            text-align: center;
+        }
+
+        .time-display {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            margin-bottom: 16px;
+        }
+
+        .time-hour {
+            width: 50px;
+            height: 60px;
+            border: 2px solid #7c3aed;
+            border-radius: 6px;
+            font-size: 36px;
+            font-weight: bold;
+            text-align: center;
+            line-height: 60px;
+            color: #000;
+            background: white;
+        }
+
+        .time-minute {
+            width: 60px;
+            height: 60px;
+            background-color: #e5e7eb;
+            border-radius: 6px;
+            font-size: 36px;
+            font-weight: bold;
+            text-align: center;
+            line-height: 60px;
+            color: #000;
+        }
+
+        .time-colon {
+            font-size: 36px;
+            font-weight: bold;
+            color: #444;
+        }
+
+        .time-ampm {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            height: 60px;
+            padding: 2px 0;
+        }
+
+        .time-ampm div {
+            font-size: 16px;
+            font-weight: bold;
+            padding: 3px 6px;
+            border-radius: 4px;
+            text-align: center;
+        }
     </style>
 </head>
 
@@ -178,19 +267,24 @@
     <div id="wrapper">
         <a href="index.html" class="top-button">←</a>
 
-        <!-- Swipe Area -->
         <div id="swipeArea">
             <div class="card-slide" id="cardSlide">
-                <!-- Cards inserted here by JS -->
             </div>
         </div>
 
-        <!-- Bottom Content -->
         <div class="bottom-content" id="bottomBox">
-            <p class="description" id="description"></p>
+            <div class="time-display" id="timeDisplay">
+                <div class="time-minute" id="timeHour">1</div>
+                <div class="time-colon">:</div>
+                <div class="time-minute" id="timeMinute">00</div>
+                <div class="time-ampm" id="timeAMPM"></div>
+            </div>
         </div>
+        <p class="description" id="description"></p>
 
-        <!-- Progress Bar -->
+
+
+
         <div id="progressContainer">
             <div id="progressBar"></div>
         </div>
@@ -199,7 +293,7 @@
     <script>
         const destinations = [
             {
-                image: "airport2.jpg", // replace with your photo
+                image: "airport2.jpg",
                 title: "1:30 AM",
                 subtitle: "Arrival at Taiwan Taoyuan International Airport T1",
                 description: "Welcome to Taipei! Collect your luggage and get ready to explore.",
@@ -213,21 +307,42 @@
             {
                 image: "mrt.jpg",
                 title: "5:00 AM",
-                subtitle: "MRT starts at 5:45 AM / Bus at 4:45 AM",
-                description: "Public transport options to get you moving early.",
+                subtitle: "MRT",
+                description: `
+        <div style="text-align:center;">
+            <div style="color: red; font-weight: bold; font-size: 20px;">REMINDER!!!</div>
+            <div style="margin-top: 4px;">Starts at 5:45 AM / Bus at 4:45 AM</div>
+        </div>
+    `,
             },
             {
                 image: "bus.jpg",
                 title: "6:00 AM",
-                subtitle: "MRT / Bus from Taoyuan to Ximen Station",
-                description: "Travel time approx 40 mins by MRT, 1 hour by bus.",
+                subtitle: "MRT/BUS",
+                description: `
+        <div style="font-weight: 600; color: #0072ff; margin-bottom: 6px;">
+            MRT / Bus from Taoyuan to Ximen Station
+        </div>
+        <div style="font-size: 14px; color: #555;">
+            Travel time approx <strong>40 mins</strong> by MRT, <strong>1 hour</strong> by bus.
+        </div>
+    `,
             },
+
             {
-                image: "hotel_luggage.jpg",
+                image: "airbnb.jpg",
                 title: "6:30 AM",
-                subtitle: "Leave luggage at hotel / MRT station (Ximending)",
-                description: "Drop off your bags and start exploring light.",
+                subtitle: "HOTEL",
+                description: `
+        <div style="font-weight: 600; color: #0072ff; margin-bottom: 6px; text-align:center;">
+            Drop off your luggage at the hotel or MRT station (Ximending)
+        </div>
+        <div style="font-size: 14px; color: #555;">
+            Travel light and get ready to explore the city hassle-free.
+        </div>
+    `,
             },
+
             {
                 image: "rainbow.jpg",
                 title: "7:00 AM",
@@ -235,7 +350,7 @@
                 description: "Enjoy the colorful streets and local vibes.",
             },
             {
-                image: "hotel_checkin.jpg",
+                image: "airbnb1.jpg",
                 title: "10:00 AM",
                 subtitle: "Check In at the hotel",
                 description: "Time to settle into your accommodation.",
@@ -250,16 +365,26 @@
                 image: "memorial.jpg",
                 title: "2:00 PM",
                 subtitle: "Chiang Kai Shek Memorial Hall",
-                description: "Visit this iconic landmark.",
+                description: `
+        Visit this iconic landmark<br><br>
+        <span style="font-weight: 600; color: #0072ff;">Open Daily: </span>9 AM to 6 PM<br>
+    `,
             },
             {
                 image: "taipei101.jpg",
                 title: "3:00 PM",
                 subtitle: "TAIPEI 101",
-                description: "Explore the tallest building with amazing views.",
+                description: `
+        Explore the tallest building with amazing views.<br><br>
+        <strong>Opening Hours:</strong><br>
+        <span style="font-weight: 600; color: #0072ff;">Monday - Thursday:</span> 11:00 AM - 9:30 PM<br>
+        <span style="font-weight: 600; color: #0072ff;">Friday - Saturday:</span> 11:00 AM - 10:00 PM<br>
+        <span style="font-weight: 600; color: #0072ff;">Sunday:</span> 11:00 AM - 9:30 PM
+    `,
             },
+
             {
-                image: "hotel_rest.jpg",
+                image: "rest.jpg",
                 title: "4:00 PM",
                 subtitle: "REST (Hotel)",
                 description: "Take a break before the evening activities.",
@@ -279,37 +404,47 @@
 
         let currentIndex = 0;
 
-        // Render cards dynamically
         destinations.forEach(dest => {
             const card = document.createElement("div");
             card.className = "card";
             card.innerHTML = `
-        <img src="${dest.image}" alt="${dest.title}" />
-        <div class="text-content">
-          <h2 class="title">${dest.title}</h2>
-          <p class="subtitle">${dest.subtitle}</p>
-        </div>`;
+                <img src="${dest.image}" alt="${dest.title}" />
+                <div class="text-content">
+                    <h2 class="subtitle"><i class="fas fa-map-marker-alt"></i> ${dest.subtitle}</h2>
+                </div>`;
             cardSlide.appendChild(card);
         });
 
-        // Update bottom details text
         function updateBottom(index) {
             const dest = destinations[index];
+            const [time, modifier] = dest.title.split(" ");
+            const [hour, minute] = time.split(":");
+
+            document.getElementById("timeHour").textContent = hour;
+            document.getElementById("timeMinute").textContent = minute;
+            document.getElementById("timeAMPM").setAttribute("data-ampm", modifier);
+
+            // Change styling for AM/PM display
+            document.querySelector(".time-ampm").innerHTML = `
+        <div style="background: ${modifier === "AM" ? '#f3e8ff' : '#fff'}; color: ${modifier === "AM" ? '#7c3aed' : '#aaa'}; padding: 3px 6px; border-radius: 4px;">AM</div>
+        <div style="background: ${modifier === "PM" ? '#f3e8ff' : '#fff'}; color: ${modifier === "PM" ? '#7c3aed' : '#aaa'}; padding: 3px 6px; border-radius: 4px;">PM</div>
+    `;
+
             description.innerHTML = dest.description;
         }
 
-        // Update progress bar
+
+
         function updateProgress(index) {
             const total = destinations.length - 1;
             const progressPercent = (index / total) * 100;
             progressBar.style.width = progressPercent + "%";
         }
 
-        // Slide cards to show current card centered with peek of next
         function slideTo(index) {
-            const cardWidthWithMargin = 300; // 280 + 20
+            const cardWidthWithMargin = 300;
             const containerWidth = 360;
-            const offset = (containerWidth - 280) / 2; // 40px
+            const offset = (containerWidth - 280) / 2;
             let translateX = index * cardWidthWithMargin - offset;
             if (translateX < 0) translateX = 0;
             const maxTranslateX = (destinations.length - 1) * cardWidthWithMargin - offset;
@@ -319,11 +454,33 @@
             updateProgress(index);
         }
 
-        updateBottom(currentIndex);
-        updateProgress(currentIndex);
-        slideTo(currentIndex);
+        function parseTimeString(timeStr) {
+            const [time, modifier] = timeStr.split(" ");
+            let [hours, minutes] = time.split(":").map(Number);
+            if (modifier === "PM" && hours !== 12) hours += 12;
+            if (modifier === "AM" && hours === 12) hours = 0;
 
-        // Swipe handling
+            const now = new Date();
+            return new Date(now.getFullYear(), now.getMonth(), now.getDate(), hours, minutes);
+        }
+
+        function autoScrollToCurrentTime() {
+            const now = new Date();
+            let closestIndex = 0;
+
+            destinations.forEach((dest, index) => {
+                const cardTime = parseTimeString(dest.title);
+                if (cardTime <= now) {
+                    closestIndex = index;
+                }
+            });
+
+            currentIndex = closestIndex;
+            slideTo(currentIndex);
+        }
+
+        autoScrollToCurrentTime();
+
         let startX = 0;
         swipeArea.addEventListener("touchstart", e => {
             startX = e.touches[0].clientX;
@@ -343,7 +500,6 @@
             }
         });
 
-        // Optional click to advance (testing)
         swipeArea.addEventListener("click", () => {
             if (currentIndex < destinations.length - 1) {
                 currentIndex++;
