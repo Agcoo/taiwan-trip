@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Swipeable Travel Card with Peek</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html,
+        body {
+            height: 100%;
+            overflow: hidden;
+            /* prevent vertical scroll */
+            font-family: 'Segoe UI', sans-serif;
+            background: linear-gradient(to bottom right, #cdd7df, #f1f3f5);
+        }
+
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+            /* remove padding here */
+            height: 100vh;
+            width: 100%;
+        }
+
+        /* Add padding inside wrapper instead */
+        #wrapper {
+            padding: 20px;
+            height: 100%;
+            width: 100%;
+            max-width: 400px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            overflow: hidden;
+            /* no scroll */
+            position: relative;
+        }
+
+        .top-button {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: rgba(255, 255, 255, 0.6);
+            backdrop-filter: blur(8px);
+            padding: 10px 20px;
+            border-radius: 30px;
+            color: #333;
+            font-weight: 600;
+            text-decoration: none;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+            z-index: 10;
+        }
+
+        #swipeArea {
+            width: 100%;
+            max-width: 360px;
+            position: relative;
+            overflow: visible;
+            /* show peek */
+            margin-top: 80px;
+            flex-shrink: 0;
+            /* prevent shrinking */
+            flex-grow: 0;
+        }
+
+        .card-slide {
+            display: flex;
+            transition: transform 0.5s ease;
+            /* width is auto to fit cards */
+        }
+
+        .card {
+            flex-shrink: 0;
+            width: 280px;
+            /* smaller than container width to allow peek */
+            margin-right: 20px;
+            /* gap to next card */
+            background: white;
+            border-radius: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .card img {
+            width: 100%;
+            height: 320px;
+            object-fit: cover;
+        }
+
+        .text-content {
+            padding: 16px 20px;
+        }
+
+        .title {
+            font-size: 20px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 5px;
+        }
+
+        .subtitle {
+            font-size: 14px;
+            color: #666;
+        }
+
+        .bottom-content {
+            width: 100%;
+            max-width: 360px;
+            margin-top: 20px;
+            padding: 0 5px;
+            color: #666;
+            font-size: 13px;
+            line-height: 1.4;
+            /* make sure this area fits */
+            flex-shrink: 0;
+            /* Optional: limit max height and scroll inside if text too long */
+            max-height: 70px;
+            overflow-y: auto;
+        }
+
+        .description span {
+            color: #00bcd4;
+            cursor: pointer;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="wrapper">
+        <a href="index.html" class="top-button">←</a>
+
+        <!-- Swipe Area -->
+        <div id="swipeArea">
+            <div class="card-slide" id="cardSlide">
+                <!-- Cards inserted here by JS -->
+            </div>
+        </div>
+
+        <!-- Bottom Content -->
+        <div class="bottom-content" id="bottomBox">
+            <p class="description" id="description"></p>
+        </div>
+    </div>
+
+    <script>
+        const destinations = [
+            {
+                image: "airport2.jpg", // replace with your photo
+                title: "1:30 AM",
+                subtitle: "Arrival at Taiwan Taoyuan International Airport T1",
+                description: "Welcome to Taipei! Collect your luggage and get ready to explore.",
+            },
+            {
+                image: "airport.jpg",
+                title: "2:00 AM",
+                subtitle: "REST (Airport)",
+                description: "Relax at the airport before your morning journey.",
+            },
+            {
+                image: "mrt.jpg",
+                title: "5:00 AM",
+                subtitle: "MRT starts at 5:45 AM / Bus at 4:45 AM",
+                description: "Public transport options to get you moving early.",
+            },
+            {
+                image: "bus.jpg",
+                title: "6:00 AM",
+                subtitle: "MRT / Bus from Taoyuan to Ximen Station",
+                description: "Travel time approx 40 mins by MRT, 1 hour by bus.",
+            },
+            {
+                image: "hotel_luggage.jpg",
+                title: "6:30 AM",
+                subtitle: "Leave luggage at hotel / MRT station (Ximending)",
+                description: "Drop off your bags and start exploring light.",
+            },
+            {
+                image: "rainbow.jpg",
+                title: "7:00 AM",
+                subtitle: "Rainbow Street",
+                description: "Enjoy the colorful streets and local vibes.",
+            },
+            {
+                image: "hotel_checkin.jpg",
+                title: "10:00 AM",
+                subtitle: "Check In at the hotel",
+                description: "Time to settle into your accommodation.",
+            },
+            {
+                image: "resto.jpg",
+                title: "12:30 PM",
+                subtitle: "Lunch",
+                description: "Try some delicious Taiwanese food.",
+            },
+            {
+                image: "memorial.jpg",
+                title: "2:00 PM",
+                subtitle: "Chiang Kai Shek Memorial Hall",
+                description: "Visit this iconic landmark.",
+            },
+            {
+                image: "taipei101.jpg",
+                title: "3:00 PM",
+                subtitle: "TAIPEI 101",
+                description: "Explore the tallest building with amazing views.",
+            },
+            {
+                image: "hotel_rest.jpg",
+                title: "4:00 PM",
+                subtitle: "REST (Hotel)",
+                description: "Take a break before the evening activities.",
+            },
+            {
+                image: "night.jpg",
+                title: "7:00 PM",
+                subtitle: "Night Market (Optional) Shilin Night Market",
+                description: "Enjoy local street food and night shopping.",
+            },
+        ];
+
+
+        const cardSlide = document.getElementById("cardSlide");
+        const description = document.getElementById("description");
+        const swipeArea = document.getElementById("swipeArea");
+
+        let currentIndex = 0;
+
+        // Render cards dynamically
+        destinations.forEach(dest => {
+            const card = document.createElement("div");
+            card.className = "card";
+            card.innerHTML = `
+        <img src="${dest.image}" alt="${dest.title}" />
+        <div class="text-content">
+          <h2 class="title">${dest.title}</h2>
+          <p class="subtitle">${dest.subtitle}</p>
+        </div>`;
+            cardSlide.appendChild(card);
+        });
+
+        // Update bottom details text
+        function updateBottom(index) {
+            const dest = destinations[index];
+            description.innerHTML = dest.description;
+        }
+
+        // Slide cards to show current card centered with peek of next
+        function slideTo(index) {
+            const cardWidthWithMargin = 300; // 280 + 20
+            const containerWidth = 360;
+            const offset = (containerWidth - 280) / 2; // 40px
+            let translateX = index * cardWidthWithMargin - offset;
+            if (translateX < 0) translateX = 0;
+            const maxTranslateX = (destinations.length - 1) * cardWidthWithMargin - offset;
+            if (translateX > maxTranslateX) translateX = maxTranslateX;
+            cardSlide.style.transform = `translateX(-${translateX}px)`;
+            updateBottom(index);
+        }
+
+        updateBottom(currentIndex);
+        slideTo(currentIndex);
+
+        // Swipe handling
+        let startX = 0;
+        swipeArea.addEventListener("touchstart", e => {
+            startX = e.touches[0].clientX;
+        });
+
+        swipeArea.addEventListener("touchend", e => {
+            const endX = e.changedTouches[0].clientX;
+            const diff = endX - startX;
+
+            if (Math.abs(diff) > 50) {
+                if (diff < 0 && currentIndex < destinations.length - 1) {
+                    currentIndex++;
+                } else if (diff > 0 && currentIndex > 0) {
+                    currentIndex--;
+                }
+                slideTo(currentIndex);
+            }
+        });
+
+        // Optional click to advance (testing)
+        swipeArea.addEventListener("click", () => {
+            if (currentIndex < destinations.length - 1) {
+                currentIndex++;
+            } else {
+                currentIndex = 0;
+            }
+            slideTo(currentIndex);
+        });
+    </script>
+
+</body>
+
+</html>
